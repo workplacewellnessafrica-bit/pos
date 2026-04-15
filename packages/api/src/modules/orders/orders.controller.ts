@@ -4,6 +4,8 @@ import { prisma } from '../../lib/prisma.js';
 import { createOrderSchema, listOrdersQuerySchema, updateOrderStatusSchema, syncOrdersSchema } from '@dukapos/shared';
 import { calculateCartTotals } from '@dukapos/shared';
 import { emitSaleNew, emitStockAlert, emitSyncAck } from '../../realtime/socket.js';
+import { PaydService } from '../../lib/payd.js';
+import { generateReceiptHTML } from '../../modifiers/receipt.js';
 import { nanoid } from 'nanoid';
 
 export const listOrders = asyncHandler(async (req: Request, res: Response) => {
@@ -235,4 +237,65 @@ export const updateOrderStatus = asyncHandler(async (req: Request, res: Response
   });
 
   res.json({ success: true, message: `Order ${status.toLowerCase()}` });
+});
+
+export const checkoutPayd = asyncHandler(async (req: Request, res: Response) => {
+  const businessId = req.user!.bid;
+  const cashierId = req.user!.sub;
+  const { phoneNumber, orderData } = req.body; // orderData = createOrderSchema payload
+  
+  if (!phoneNumber) throw new AppError(400, 'Phone number required for Payd STK Push');
+  const input = createOrderSchema.parse(orderData);
+
+  // 1. Create order as PENDING
+  const settings = await prisma.businessSettings.findUnique({ where: { businessId } });
+  const taxRate = Number(settings?.taxRate ?? 16);
+  const cartItems = input.lines.map(l => ({ unitPrice: l.unitPriceAtSale, quantity: l.quantity, discount: l.discount }));
+  const { subtotal, discountTotal, taxAmount, total } = calculateCartTotals(cartItems, taxRate, settings?.taxInclusive ?? false);
+
+  const receiptNo = `RCP-${nanoid(8).toUpperCase()}`;
+
+  const order = await prisma.order.create({
+    data: {
+      businessId, cashierId,
+      paymentMethod: 'MPESA',
+      subtotal, discountTotal: discountTotal + (input.discountTotal ?? 0),
+      taxAmount, total,
+      receiptNo,
+      status: 'PENDING',
+      lines: {
+        create: input.lines.map(l => ({
+          productId: l.productId, variantId: l.variantId,
+          quantity: l.quantity, unitPriceAtSale: l.unitPriceAtSale,
+          discount: l.discount, lineTotal: (l.unitPriceAtSale * l.quantity) - l.discount,
+        })),
+      },
+    },
+  });
+
+  // 2. Initiate STK Push via Payd Kenya
+  const paydRes = await PaydService.requestSTKPush(phoneNumber, total, receiptNo, `Payment for Order ${receiptNo}`);
+
+  // We could save paydRes.transactionId to the order here if we tracked it
+  
+  res.status(200).json({ success: true, data: { orderId: order.id, status: paydRes.status, transactionId: paydRes.transactionId } });
+});
+
+export const downloadReceipt = asyncHandler(async (req: Request, res: Response) => {
+  const businessId = req.user!.bid;
+  
+  const order = await prisma.order.findFirst({
+    where: { id: req.params['id'], businessId },
+    include: {
+      lines: { include: { variant: { include: { variantOptions: { include: { optionValue: true } } } }, product: true } },
+      cashier: true,
+      business: true,
+    },
+  });
+
+  if (!order) throw new AppError(404, 'Order not found');
+
+  const html = generateReceiptHTML(order, order.business);
+  res.setHeader('Content-Type', 'text/html');
+  res.send(html);
 });
