@@ -31,7 +31,7 @@ export const createAdjustment = asyncHandler(async (req: Request, res: Response)
 
   const [adjustment, updated] = await prisma.$transaction([
     prisma.inventoryAdjustment.create({
-      data: { variantId: input.variantId, userId, delta: input.delta, reason: input.reason, notes: input.notes },
+      data: { variantId: input.variantId, userId, delta: input.delta, reason: input.reason, notes: input.notes ?? null },
     }),
     prisma.variant.update({
       where: { id: input.variantId },
@@ -77,9 +77,9 @@ export const receiveStock = asyncHandler(async (req: Request, res: Response) => 
     const r = await tx.stockReceipt.create({
       data: {
         businessId,
-        supplierId: input.supplierId,
-        referenceNo: input.referenceNo,
-        notes: input.notes,
+        supplierId: input.supplierId ?? null,
+        referenceNo: input.referenceNo ?? null,
+        notes: input.notes ?? null,
         receivedById: userId,
         items: { create: input.items.map(i => ({ variantId: i.variantId, quantity: i.quantity, purchasePrice: i.purchasePrice })) },
       },
@@ -136,6 +136,6 @@ export const createSupplier = asyncHandler(async (req: Request, res: Response) =
   const businessId = req.user!.bid;
   const { name, email, phone, address } = req.body as { name: string; email?: string; phone?: string; address?: string };
   if (!name) throw new AppError(400, 'Supplier name is required');
-  const supplier = await prisma.supplier.create({ data: { businessId, name, email, phone, address } });
+  const supplier = await prisma.supplier.create({ data: { businessId, name, email: email ?? null, phone: phone ?? null, address: address ?? null } });
   res.status(201).json({ success: true, data: supplier });
 });

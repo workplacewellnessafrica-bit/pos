@@ -17,6 +17,6 @@ if (process.env['NODE_ENV'] !== 'production') {
   globalForPrisma.prisma = prisma;
 }
 
-prisma.$on('error', (e: any) => {
+(prisma as any).$on('error', (e: any) => {
   logger.error('Prisma error', { message: e.message, target: e.target });
 });

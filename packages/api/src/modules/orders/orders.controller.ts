@@ -206,7 +206,7 @@ export const syncOfflineOrders = asyncHandler(async (req: Request, res: Response
 export const getOrder = asyncHandler(async (req: Request, res: Response) => {
   const businessId = req.user!.bid;
   const order = await prisma.order.findFirst({
-    where: { id: req.params['id'], businessId },
+    where: { id: req.params['id'] as string, businessId },
     include: {
       lines: { include: { variant: { include: { variantOptions: { include: { optionValue: { include: { variantGroup: true } } } } } }, product: { select: { name: true, images: true } } } },
       cashier: { select: { name: true, email: true } },
@@ -221,7 +221,7 @@ export const updateOrderStatus = asyncHandler(async (req: Request, res: Response
   const businessId = req.user!.bid;
   const { status, refundAmount } = updateOrderStatusSchema.parse(req.body);
 
-  const order = await prisma.order.findFirst({ where: { id: req.params['id'], businessId } });
+  const order = await prisma.order.findFirst({ where: { id: req.params['id'] as string, businessId } });
   if (!order) throw new AppError(404, 'Order not found');
 
   await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
@@ -287,7 +287,7 @@ export const downloadReceipt = asyncHandler(async (req: Request, res: Response) 
   const businessId = req.user!.bid;
   
   const order = await prisma.order.findFirst({
-    where: { id: req.params['id'], businessId },
+    where: { id: req.params['id'] as string, businessId },
     include: {
       lines: { include: { variant: { include: { variantOptions: { include: { optionValue: true } } } }, product: true } },
       cashier: true,
@@ -297,7 +297,7 @@ export const downloadReceipt = asyncHandler(async (req: Request, res: Response) 
 
   if (!order) throw new AppError(404, 'Order not found');
 
-  const html = generateReceiptHTML(order, order.business);
+  const html = generateReceiptHTML(order as any, (order as any).business);
   res.setHeader('Content-Type', 'text/html');
   res.send(html);
 });

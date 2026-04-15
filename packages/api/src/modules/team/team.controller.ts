@@ -44,7 +44,7 @@ export const createStaff = asyncHandler(async (req: Request, res: Response) => {
 export const getStaff = asyncHandler(async (req: Request, res: Response) => {
   const businessId = req.user!.bid;
   const user = await prisma.user.findFirst({
-    where: { id: req.params['id'], businessId },
+    where: { id: req.params['id'] as string, businessId },
     select: { id: true, name: true, email: true, role: true, isActive: true, lastLoginAt: true, createdAt: true },
   });
   if (!user) throw new AppError(404, 'Staff member not found');
@@ -61,7 +61,7 @@ export const updateStaff = asyncHandler(async (req: Request, res: Response) => {
   if (pin) update['pin'] = await bcrypt.hash(pin, 10);
 
   const result = await prisma.user.updateMany({
-    where: { id: req.params['id'], businessId },
+    where: { id: req.params['id'] as string, businessId },
     data: update,
   });
   if (result.count === 0) throw new AppError(404, 'Staff member not found');
@@ -71,7 +71,7 @@ export const updateStaff = asyncHandler(async (req: Request, res: Response) => {
 export const deactivateStaff = asyncHandler(async (req: Request, res: Response) => {
   const businessId = req.user!.bid;
   const result = await prisma.user.updateMany({
-    where: { id: req.params['id'], businessId },
+    where: { id: req.params['id'] as string, businessId },
     data: { isActive: false },
   });
   if (result.count === 0) throw new AppError(404, 'Staff member not found');
@@ -82,7 +82,7 @@ export const deactivateStaff = asyncHandler(async (req: Request, res: Response) 
 export const kickSession = asyncHandler(async (req: Request, res: Response) => {
   const businessId = req.user!.bid;
   await prisma.refreshToken.updateMany({
-    where: { userId: req.params['id'] },
+    where: { userId: req.params['id'] as string },
     data: { revokedAt: new Date() },
   });
   emitSessionKicked(businessId, req.params['id']!);

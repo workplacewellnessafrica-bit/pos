@@ -38,7 +38,14 @@ export const createProduct = asyncHandler(async (req: Request, res: Response) =>
   const input = createProductSchema.parse(req.body);
 
   const product = await prisma.product.create({
-    data: { ...input, businessId, basePrice: input.basePrice },
+    data: { 
+      ...input, 
+      businessId, 
+      basePrice: input.basePrice,
+      description: input.description ?? null,
+      categoryId: input.categoryId ?? null,
+      barcode: input.barcode ?? null,
+    },
   });
 
   res.status(201).json({ success: true, data: product });
@@ -47,7 +54,7 @@ export const createProduct = asyncHandler(async (req: Request, res: Response) =>
 export const getProduct = asyncHandler(async (req: Request, res: Response) => {
   const businessId = req.user!.bid;
   const product = await prisma.product.findFirst({
-    where: { id: req.params['id'], businessId },
+    where: { id: req.params['id'] as string, businessId },
     include: {
       variantGroups: { include: { optionValues: { orderBy: { displayOrder: 'asc' } } }, orderBy: { displayOrder: 'asc' } },
       variants: { include: { variantOptions: { include: { optionValue: { include: { variantGroup: true } } } } } },
@@ -62,8 +69,13 @@ export const updateProduct = asyncHandler(async (req: Request, res: Response) =>
   const businessId = req.user!.bid;
   const input = updateProductSchema.parse(req.body);
   const product = await prisma.product.updateMany({
-    where: { id: req.params['id'], businessId },
-    data: input,
+    where: { id: req.params['id'] as string, businessId },
+    data: {
+      ...input,
+      description: input.description ?? undefined,
+      categoryId: input.categoryId ?? undefined,
+      barcode: input.barcode ?? undefined,
+    } as any,
   });
   if (product.count === 0) throw new AppError(404, 'Product not found');
   res.json({ success: true, message: 'Product updated' });
@@ -72,7 +84,7 @@ export const updateProduct = asyncHandler(async (req: Request, res: Response) =>
 export const deleteProduct = asyncHandler(async (req: Request, res: Response) => {
   const businessId = req.user!.bid;
   await prisma.product.updateMany({
-    where: { id: req.params['id'], businessId },
+    where: { id: req.params['id'] as string, businessId },
     data: { isActive: false },
   });
   res.json({ success: true, message: 'Product deactivated' });
@@ -145,8 +157,12 @@ export const updateVariant = asyncHandler(async (req: Request, res: Response) =>
   const businessId = req.user!.bid;
   const input = updateVariantSchema.parse(req.body);
   const updated = await prisma.variant.updateMany({
-    where: { id: req.params['variantId'], product: { businessId } },
-    data: input,
+    where: { id: req.params['variantId'] as string, product: { businessId } },
+    data: {
+      ...input,
+      sku: input.sku ?? undefined,
+      barcode: input.barcode ?? undefined,
+    } as any,
   });
   if (updated.count === 0) throw new AppError(404, 'Variant not found');
   res.json({ success: true, message: 'Variant updated' });
@@ -159,8 +175,15 @@ export const bulkUpdateVariants = asyncHandler(async (req: Request, res: Respons
   await prisma.$transaction(
     variants.map(v =>
       prisma.variant.updateMany({
-        where: { id: v.id, product: { businessId } },
-        data: { sku: v.sku, price: v.price, stockQuantity: v.stockQuantity, alertThreshold: v.alertThreshold, barcode: v.barcode, isActive: v.isActive },
+        where: { id: v.id as string, product: { businessId } },
+        data: { 
+          sku: v.sku ?? null, 
+          price: v.price, 
+          stockQuantity: v.stockQuantity, 
+          alertThreshold: v.alertThreshold ?? 5, 
+          barcode: v.barcode ?? null, 
+          isActive: v.isActive 
+        },
       })
     )
   );

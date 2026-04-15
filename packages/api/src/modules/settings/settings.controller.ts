@@ -32,7 +32,14 @@ export const updateBusinessProfile = asyncHandler(async (req: Request, res: Resp
   const { name, phone, address, taxNumber, currency, locale } = req.body as Record<string, string>;
   await prisma.business.update({
     where: { id: businessId },
-    data: { name, phone, address, taxNumber, currency, locale },
+    data: { 
+      name, 
+      phone: phone ?? null, 
+      address: address ?? null, 
+      taxNumber: taxNumber ?? null, 
+      currency, 
+      locale 
+    },
   });
   res.json({ success: true, message: 'Business profile updated' });
 });
