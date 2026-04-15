@@ -1,0 +1,56 @@
+.hero {
+  position: relative; overflow: hidden;
+  padding: 100px 0 80px;
+  text-align: center;
+}
+.glow1 {
+  position: absolute; top: -120px; left: 50%; transform: translateX(-50%);
+  width: 900px; height: 600px;
+  background: radial-gradient(ellipse, rgba(59,130,246,.14) 0%, transparent 70%);
+  pointer-events: none;
+}
+.glow2 {
+  position: absolute; bottom: -80px; right: -100px;
+  width: 500px; height: 400px;
+  background: radial-gradient(ellipse, rgba(99,102,241,.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+.grid {
+  position: absolute; inset: 0;
+  background-image: linear-gradient(rgba(59,130,246,.03) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(59,130,246,.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+}
+.inner { position: relative; z-index: 1; max-width: 800px; margin: 0 auto; }
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(59,130,246,.1); border: 1px solid rgba(59,130,246,.25);
+  border-radius: 999px; padding: 6px 14px;
+  font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+  color: #60a5fa; margin-bottom: 28px;
+}
+.heading {
+  font-size: clamp(36px, 6vw, 68px); font-weight: 900;
+  letter-spacing: -.04em; line-height: 1.05;
+  margin-bottom: 24px; color: #e2e8f0;
+}
+.gradient {
+  background: linear-gradient(135deg, #3b82f6 20%, #8b5cf6 80%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.sub {
+  font-size: 18px; color: #94a3b8; line-height: 1.7;
+  max-width: 620px; margin: 0 auto 36px;
+}
+.ctas { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; margin-bottom: 48px; }
+.surfaces {
+  display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap;
+}
+.surfaceCard {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08);
+  border-radius: 12px; padding: 12px 18px;
+}
+.surfaceLabel { font-size: 13px; font-weight: 600; color: #e2e8f0; }
+.surfaceDesc  { font-size: 11px; color: #64748b; }

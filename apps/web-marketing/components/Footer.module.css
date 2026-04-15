@@ -1,0 +1,59 @@
+.footer {
+  background: #080f1e;
+  border-top: 1px solid #1a2d4a;
+  padding: 64px 0 32px;
+}
+.grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.7fr 0.7fr 1.6fr;
+  gap: 40px;
+  margin-bottom: 48px;
+}
+.brand {}
+.logo { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+.logoIcon {
+  width: 28px; height: 28px; border-radius: 7px;
+  background: linear-gradient(135deg,#3b82f6,#6366f1);
+  display: flex; align-items: center; justify-content: center; color:#fff;
+}
+.logoText { font-size:16px; font-weight:800; letter-spacing:-.03em; color:#e2e8f0; }
+.tagline { font-size:13px; color:#64748b; line-height:1.6; max-width:220px; }
+.links { display: flex; flex-direction: column; gap: 8px; }
+.links h4 { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:#475569; margin-bottom:4px; }
+.links a { font-size:13px; color:#64748b; text-decoration:none; transition:color .2s; }
+.links a:hover { color:#e2e8f0; }
+.regBox {
+  background: #0a1628;
+  border: 1px solid #1a2d4a;
+  border-radius: 16px; padding: 24px;
+}
+.regBox h3 { font-size:16px; font-weight:700; margin-bottom:6px; color:#e2e8f0; }
+.regSub { font-size:12px; color:#64748b; margin-bottom:16px; }
+.form { display: flex; flex-direction: column; gap: 10px; }
+.input {
+  width: 100%; background: #0f1f3d; border: 1px solid #213657;
+  border-radius: 8px; color: #e2e8f0; font-family:inherit; font-size:13px; padding: 9px 12px; outline: none;
+  transition: border-color .2s;
+}
+.input:focus { border-color: #3b82f6; }
+.input::placeholder { color: #334155; }
+.step2Btns { display: flex; gap: 8px; }
+.success {
+  background: rgba(16,185,129,.08); border: 1px solid rgba(16,185,129,.3);
+  border-radius: 10px; padding: 14px; font-size:13px; color:#10b981; line-height:1.5;
+}
+.bottom {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-top: 24px; border-top: 1px solid #1a2d4a;
+  font-size:12px; color:#475569;
+}
+.bottomRight { color:#475569; }
+@media (max-width:900px) {
+  .grid { grid-template-columns:1fr 1fr; }
+  .regBox { grid-column:1/span 2; }
+}
+@media (max-width:600px) {
+  .grid { grid-template-columns:1fr; }
+  .regBox { grid-column:auto; }
+  .bottom { flex-direction:column; gap:8px; text-align:center; }
+}

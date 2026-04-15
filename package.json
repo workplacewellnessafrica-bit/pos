@@ -1,0 +1,25 @@
+{
+  "name": "dukapos",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "pnpm@9.0.0",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "db:generate": "pnpm --filter @dukapos/db generate",
+    "db:migrate": "pnpm --filter @dukapos/db migrate:dev",
+    "db:push": "pnpm --filter @dukapos/db db:push",
+    "db:seed": "pnpm --filter @dukapos/db seed",
+    "api:dev": "pnpm --filter @dukapos/api dev",
+    "admin:dev": "pnpm --filter @dukapos/web-admin dev",
+    "marketing:dev": "pnpm --filter @dukapos/web-marketing dev"
+  },
+  "devDependencies": {
+    "turbo": "^2.0.0",
+    "typescript": "^5.4.5",
+    "prettier": "^3.2.5",
+    "@types/node": "^20.12.7"
+  }
+}

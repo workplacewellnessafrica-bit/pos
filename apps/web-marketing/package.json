@@ -1,0 +1,27 @@
+{
+  "name": "@dukapos/web-marketing",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@dukapos/shared": "workspace:*",
+    "next": "^14.2.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "axios": "^1.6.8",
+    "lucide-react": "^0.378.0",
+    "framer-motion": "^11.1.9",
+    "date-fns": "^3.6.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.1",
+    "@types/react-dom": "^18.3.0",
+    "@types/node": "^20.12.7",
+    "typescript": "^5.4.5"
+  }
+}
