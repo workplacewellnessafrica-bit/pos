@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: dukapos
+      POSTGRES_PASSWORD: secure_password_here
+      POSTGRES_DB: dukapos
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dukapos"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      target: api
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://dukapos:secure_password_here@postgres:5432/dukapos?schema=public
+      - JWT_SECRET=change_me_to_a_secure_random_string_in_production
+      - CLOUDINARY_CLOUD_NAME=your_cloud_name
+      - CLOUDINARY_API_KEY=your_key
+      - CLOUDINARY_API_SECRET=your_secret
+      # Automatically migrate db string on boot
+    command: >
+      sh -c "pnpm --filter @dukapos/db run migrate && pnpm --filter @dukapos/api start"
+
+  admin:
+    build:
+      context: .
+      target: admin
+    restart: always
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+
+  marketing:
+    build:
+      context: .
+      target: marketing
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://your_domain_or_droplet_ip:4000/api/v1
+    depends_on:
+      - api
+
+volumes:
+  pgdata:

@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/auth';
 import { Layout } from '@/components/Layout/Layout';
 import { LoginPage }     from '@/pages/Login';
+import { OnboardingPage } from '@/pages/Onboarding';
 import { DashboardPage } from '@/pages/Dashboard';
 import { ProductsRouter }  from '@/pages/Products/ProductsRouter';
 import { InventoryPage } from '@/pages/Inventory';
@@ -28,6 +29,9 @@ export default function App() {
       <Routes>
         <Route path="/login" element={
           <RequireGuest><LoginPage /></RequireGuest>
+        } />
+        <Route path="/onboard" element={
+          <RequireAuth><OnboardingPage /></RequireAuth>
         } />
         <Route element={
           <RequireAuth><Layout /></RequireAuth>
