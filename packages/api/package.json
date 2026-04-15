@@ -30,7 +30,7 @@
     "cloudinary": "^2.2.0",
     "multer-storage-cloudinary": "^4.0.0",
     "exceljs": "^4.4.0",
-    "africastalking": "^0.8.1",
+    "africastalking": "^0.7.9",
     "nanoid": "^5.0.7",
     "date-fns": "^3.6.0",
     "winston": "^3.13.0",
