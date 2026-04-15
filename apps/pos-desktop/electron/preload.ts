@@ -1,6 +1,7 @@
-import { contextBridge } from 'electron';
+import { contextBridge, ipcRenderer } from 'electron';
 
 contextBridge.exposeInMainWorld('electronAPI', {
   platform: process.platform,
-  // IPC methods for ESC/POS printing will be stubbed here later
+  printESCPOS: (data: any) => ipcRenderer.invoke('print-receipt-escpos', data),
+  printHTML: (url: string) => ipcRenderer.invoke('print-receipt-html', url),
 });
