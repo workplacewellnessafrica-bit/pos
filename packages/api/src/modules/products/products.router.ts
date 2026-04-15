@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import { authenticate, requireRole, businessScope } from '../../middleware/auth.js';
+import { upload } from '../../lib/upload.js';
+import { CAN_MANAGE_PRODUCTS } from '@dukapos/shared';
 import * as ctrl from './products.controller.js';
 
 export const productsRouter = Router();
@@ -21,8 +23,8 @@ productsRouter.patch('/variants/:variantId', requireRole('OWNER','MANAGER'), ctr
 productsRouter.patch('/variants/bulk',       requireRole('OWNER','MANAGER'), ctrl.bulkUpdateVariants);
 
 // Images
-productsRouter.post('/:id/images',                  requireRole('OWNER','MANAGER'), ctrl.uploadProductImages);
-productsRouter.post('/variants/:variantId/images',  requireRole('OWNER','MANAGER'), ctrl.uploadVariantImages);
+productsRouter.post('/:id/images',                  requireRole('OWNER','MANAGER'), upload.array('images', 5), ctrl.uploadProductImages);
+productsRouter.post('/variants/:variantId/images',  requireRole('OWNER','MANAGER'), upload.array('images', 5), ctrl.uploadVariantImages);
 
 // Categories
 productsRouter.get('/categories',    ctrl.listCategories);

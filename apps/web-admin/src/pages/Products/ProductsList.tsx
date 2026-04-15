@@ -16,7 +16,7 @@ interface Product {
 const fmt = (n: string | number) =>
   `KES ${Number(n).toLocaleString('en-KE', { minimumFractionDigits: 2 })}`;
 
-export function ProductsPage() {
+export function ProductsList() {
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
   const role = useAuthStore(s => s.user?.role);

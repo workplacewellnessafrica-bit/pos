@@ -166,10 +166,25 @@ export const bulkUpdateVariants = asyncHandler(async (req: Request, res: Respons
   res.json({ success: true, message: `${variants.length} variants updated` });
 });
 
-export const uploadProductImages = asyncHandler(async (_req: Request, res: Response) => {
-  // Cloudinary upload handled by multer-storage-cloudinary middleware
-  // This stub returns the uploaded URLs — full implementation is wired at router level
-  res.json({ success: true, data: { urls: [] } });
+export const uploadProductImages = asyncHandler(async (req: Request, res: Response) => {
+  const files = req.files as Express.Multer.File[];
+  if (!files || files.length === 0) throw new AppError(400, 'No images uploaded');
+  
+  const urls = files.map(f => f.path);
+  const businessId = req.user!.bid;
+  const productId = req.params['id']!;
+
+  // Append to existing images
+  const product = await prisma.product.findFirst({ where: { id: productId, businessId } });
+  if (!product) throw new AppError(404, 'Product not found');
+
+  const updatedImages = [...product.images, ...urls];
+  await prisma.product.update({
+    where: { id: productId },
+    data: { images: updatedImages },
+  });
+
+  res.json({ success: true, data: { urls: updatedImages } });
 });
 
 export const uploadVariantImages = asyncHandler(async (_req: Request, res: Response) => {

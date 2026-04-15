@@ -1,0 +1,79 @@
+.product-detail-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+}
+
+.variant-groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.v-group-card {
+  background: var(--bg-surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.group-name-input {
+  background: transparent;
+  border-bottom: 2px solid var(--border);
+  border-radius: 0;
+  padding: 4px 0;
+  font-weight: 600;
+  font-size: 15px;
+}
+.group-name-input:focus {
+  border-color: var(--blue);
+  background: transparent;
+}
+
+.v-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--blue);
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.v-tag button {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,.7);
+  cursor: pointer;
+  display: flex;
+}
+.v-tag button:hover {
+  color: #fff;
+}
+
+.v-tag-input {
+  background: transparent;
+  width: 140px;
+  padding: 4px 8px;
+  font-size: 12px;
+  height: 28px;
+}
+
+.table-input {
+  height: 32px;
+  padding: 0 8px;
+  font-size: 13px;
+  background: var(--bg-surface3);
+  border-color: transparent;
+}
+.table-input:focus {
+  background: var(--bg-surface);
+  border-color: var(--blue);
+}
+
+@media (max-width: 1000px) {
+  .product-detail-grid {
+    grid-template-columns: 1fr;
+  }
+}

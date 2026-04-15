@@ -3,7 +3,7 @@ import { useAuthStore } from '@/stores/auth';
 import { Layout } from '@/components/Layout/Layout';
 import { LoginPage }     from '@/pages/Login';
 import { DashboardPage } from '@/pages/Dashboard';
-import { ProductsPage }  from '@/pages/Products/ProductsPage';
+import { ProductsRouter }  from '@/pages/Products/ProductsRouter';
 import { InventoryPage } from '@/pages/Inventory';
 import { OrdersPage }    from '@/pages/Orders';
 import { ReportsPage }   from '@/pages/Reports';
@@ -33,7 +33,7 @@ export default function App() {
           <RequireAuth><Layout /></RequireAuth>
         }>
           <Route index element={<DashboardPage />} />
-          <Route path="products/*" element={<ProductsPage />} />
+          <Route path="products/*" element={<ProductsRouter />} />
           <Route path="inventory"  element={<InventoryPage />} />
           <Route path="orders"     element={<OrdersPage />} />
           <Route path="reports"    element={<ReportsPage />} />
