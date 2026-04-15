@@ -4,7 +4,7 @@ services:
     name: dukapos-api
     plan: free
     env: node
-    buildCommand: corepack enable && pnpm install --no-frozen-lockfile && pnpm run build
+    buildCommand: corepack enable && pnpm install --prod=false && pnpm run build
     # Prisma migrate deploy ensures schema is up to date before the server starts
     startCommand: pnpm --filter @dukapos/db run migrate && pnpm --filter @dukapos/api start
     envVars:
