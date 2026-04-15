@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { authenticate, requireRole, businessScope } from '../../middleware/auth.js';
 import * as ctrl from './team.controller.js';
 
-export const teamRouter = Router();
+export const teamRouter: Router = Router();
 teamRouter.use(authenticate, businessScope);
 
 teamRouter.get('/',           requireRole('OWNER', 'MANAGER'), ctrl.listStaff);

@@ -23,22 +23,22 @@ export const revenueReport = asyncHandler(async (req: Request, res: Response) =>
   });
 
   // Group by day
-  const byDay = orders.reduce<Record<string, { revenue: number; count: number }>>((acc, o) => {
+  const byDay = (orders as any[]).reduce((acc: Record<string, { revenue: number; count: number }>, o: any) => {
     const day = format(o.createdAt, 'yyyy-MM-dd');
     if (!acc[day]) acc[day] = { revenue: 0, count: 0 };
     acc[day]!.revenue += Number(o.total);
     acc[day]!.count += 1;
     return acc;
-  }, {});
+  }, {} as Record<string, { revenue: number; count: number }>);
 
-  const totalRevenue = orders.reduce((s, o) => s + Number(o.total), 0);
-  const totalTax = orders.reduce((s, o) => s + Number(o.taxAmount), 0);
-  const totalDiscount = orders.reduce((s, o) => s + Number(o.discountTotal), 0);
+  const totalRevenue = (orders as any[]).reduce((s: number, o: any) => s + Number(o.total), 0);
+  const totalTax = (orders as any[]).reduce((s: number, o: any) => s + Number(o.taxAmount), 0);
+  const totalDiscount = (orders as any[]).reduce((s: number, o: any) => s + Number(o.discountTotal), 0);
 
-  const paymentBreakdown = orders.reduce<Record<string, number>>((acc, o) => {
+  const paymentBreakdown = (orders as any[]).reduce((acc: Record<string, number>, o: any) => {
     acc[o.paymentMethod] = (acc[o.paymentMethod] ?? 0) + Number(o.total);
     return acc;
-  }, {});
+  }, {} as Record<string, number>);
 
   res.json({
     success: true,
@@ -65,17 +65,17 @@ export const productsReport = asyncHandler(async (req: Request, res: Response) =
   });
 
   // Aggregate by product
-  const byProduct = lines.reduce<Record<string, { name: string; quantity: number; revenue: number }>>((acc, l) => {
+  const byProduct = (lines as any[]).reduce((acc: Record<string, { name: string; quantity: number; revenue: number }>, l: any) => {
     const key = l.productId ?? l.variantId ?? 'unknown';
     const name = l.product?.name ?? 'Unknown';
     if (!acc[key]) acc[key] = { name, quantity: 0, revenue: 0 };
     acc[key]!.quantity += l.quantity;
     acc[key]!.revenue += Number(l.lineTotal);
     return acc;
-  }, {});
+  }, {} as Record<string, { name: string; quantity: number; revenue: number }>);
 
   const sorted = Object.entries(byProduct)
-    .map(([id, v]) => ({ id, ...v }))
+    .map(([id, v]: [string, any]) => ({ id, name: v.name, quantity: v.quantity, revenue: v.revenue }))
     .sort((a, b) => b.revenue - a.revenue);
 
   res.json({ success: true, data: sorted });
@@ -90,14 +90,14 @@ export const staffReport = asyncHandler(async (req: Request, res: Response) => {
     select: { cashierId: true, total: true, cashier: { select: { name: true } } },
   });
 
-  const byStaff = orders.reduce<Record<string, { name: string; count: number; revenue: number }>>((acc, o) => {
+  const byStaff = (orders as any[]).reduce((acc: Record<string, { name: string; count: number; revenue: number }>, o: any) => {
     if (!acc[o.cashierId]) acc[o.cashierId] = { name: o.cashier.name, count: 0, revenue: 0 };
     acc[o.cashierId]!.count += 1;
     acc[o.cashierId]!.revenue += Number(o.total);
     return acc;
-  }, {});
+  }, {} as Record<string, { name: string; count: number; revenue: number }>);
 
-  res.json({ success: true, data: Object.entries(byStaff).map(([id, v]) => ({ id, ...v })) });
+  res.json({ success: true, data: Object.entries(byStaff).map(([id, v]: [string, any]) => ({ id, name: v.name, count: v.count, revenue: v.revenue })) });
 });
 
 export const exportXls = asyncHandler(async (req: Request, res: Response) => {
@@ -129,7 +129,7 @@ export const exportXls = asyncHandler(async (req: Request, res: Response) => {
       orderBy: { createdAt: 'asc' },
     });
 
-    orders.forEach(o => sheet.addRow({
+    orders.forEach((o: any) => sheet.addRow({
       date: format(o.createdAt, 'yyyy-MM-dd HH:mm'),
       receiptNo: o.receiptNo,
       cashier: o.cashier.name,

@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 import { asyncHandler, AppError } from '../../middleware/error.js';
 import { prisma } from '../../lib/prisma.js';
+import { Prisma } from '@prisma/client';
 import {
   createProductSchema, updateProductSchema,
   upsertVariantGroupsSchema, updateVariantSchema, bulkUpdateVariantsSchema,
@@ -86,7 +87,7 @@ export const upsertVariantGroups = asyncHandler(async (req: Request, res: Respon
   if (!product) throw new AppError(404, 'Product not found');
   if (groups.length > 3) throw new AppError(400, 'Maximum 3 variant groups per product');
 
-  await prisma.$transaction(async (tx) => {
+  await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     // Delete existing groups and cascade
     await tx.variantGroup.deleteMany({ where: { productId } });
 
@@ -110,7 +111,7 @@ export const upsertVariantGroups = asyncHandler(async (req: Request, res: Respon
 
     // Generate and create all variant combinations
     const combinations = generateVariantCombinations(
-      createdGroups.map(g => ({ id: g.id, name: g.name, optionValues: g.optionValues }))
+      createdGroups.map((g: any) => ({ id: g.id, name: g.name, optionValues: g.optionValues }))
     );
 
     // Delete existing variants and recreate
@@ -220,7 +221,7 @@ export const importCsv = asyncHandler(async (req: Request, res: Response) => {
   // Basic flat product import for v1. Variants map to simple products or can be grouped by Name.
   // We'll create simple products for now as a baseline capability.
   let added = 0;
-  await prisma.$transaction(async (tx) => {
+  await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     for (const row of records) {
       if (!row.Name || !row.BasePrice) continue;
       

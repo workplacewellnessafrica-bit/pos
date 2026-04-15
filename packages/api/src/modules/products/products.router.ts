@@ -6,7 +6,7 @@ const memUpload = multer({ storage: multer.memoryStorage() });
 import { CAN_MANAGE_PRODUCTS } from '@dukapos/shared';
 import * as ctrl from './products.controller.js';
 
-export const productsRouter = Router();
+export const productsRouter: Router = Router();
 productsRouter.use(authenticate, businessScope);
 
 // Products

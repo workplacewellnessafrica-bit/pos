@@ -5,7 +5,7 @@ import { logger } from '../lib/logger.js';
 export class AppError extends Error {
   constructor(
     public statusCode: number,
-    public message: string,
+    message: string,
     public errors?: Array<{ field?: string; message: string }>,
   ) {
     super(message);

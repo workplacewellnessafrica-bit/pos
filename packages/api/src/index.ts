@@ -22,7 +22,7 @@ import { reportsRouter } from './modules/reports/reports.router.js';
 import { teamRouter } from './modules/team/team.router.js';
 import { settingsRouter } from './modules/settings/settings.router.js';
 
-const app = express();
+const app: express.Application = express();
 const httpServer = createServer(app);
 
 // ── Socket.io ────────────────────────────────────────────────────────────────

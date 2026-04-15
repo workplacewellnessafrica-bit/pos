@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 import { asyncHandler, AppError } from '../../middleware/error.js';
 import { prisma } from '../../lib/prisma.js';
+import { Prisma } from '@prisma/client';
 import { createOrderSchema, listOrdersQuerySchema, updateOrderStatusSchema, syncOrdersSchema } from '@dukapos/shared';
 import { calculateCartTotals } from '@dukapos/shared';
 import { emitSaleNew, emitStockAlert, emitSyncAck } from '../../realtime/socket.js';
@@ -12,7 +13,7 @@ export const listOrders = asyncHandler(async (req: Request, res: Response) => {
   const businessId = req.user!.bid;
   const query = listOrdersQuerySchema.parse(req.query);
 
-  const where: Parameters<typeof prisma.order.findMany>[0]['where'] = {
+  const where: any = {
     businessId,
     ...(query.status ? { status: query.status } : {}),
     ...(query.cashierId ? { cashierId: query.cashierId } : {}),
@@ -69,6 +70,7 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
 
   // Build cart items for total calculation
   const cartItems = input.lines.map(l => ({
+    productName: '',
     unitPrice: l.unitPriceAtSale,
     quantity: l.quantity,
     discount: l.discount,
@@ -77,7 +79,7 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
 
   const receiptNo = `RCP-${nanoid(8).toUpperCase()}`;
 
-  const order = await prisma.$transaction(async (tx) => {
+  const order = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     const newOrder = await tx.order.create({
       data: {
         businessId,
@@ -162,10 +164,10 @@ export const syncOfflineOrders = asyncHandler(async (req: Request, res: Response
       const settings = await prisma.businessSettings.findUnique({ where: { businessId } });
       const taxRate = Number(settings?.taxRate ?? 16);
       const taxInclusive = settings?.taxInclusive ?? false;
-      const cartItems = order.lines.map(l => ({ unitPrice: l.unitPriceAtSale, quantity: l.quantity, discount: l.discount }));
+      const cartItems = order.lines.map(l => ({ productName: '', unitPrice: l.unitPriceAtSale, quantity: l.quantity, discount: l.discount }));
       const { subtotal, discountTotal, taxAmount, total } = calculateCartTotals(cartItems, taxRate, taxInclusive);
 
-      await prisma.$transaction(async (tx) => {
+      await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         const newOrder = await tx.order.create({
           data: {
             businessId, cashierId: req.user!.sub,
@@ -222,7 +224,7 @@ export const updateOrderStatus = asyncHandler(async (req: Request, res: Response
   const order = await prisma.order.findFirst({ where: { id: req.params['id'], businessId } });
   if (!order) throw new AppError(404, 'Order not found');
 
-  await prisma.$transaction(async (tx) => {
+  await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     await tx.order.update({ where: { id: order.id }, data: { status } });
     if (status === 'REFUNDED') {
       await tx.refund.create({ data: { orderId: order.id, amount: refundAmount ?? order.total } });
@@ -250,7 +252,7 @@ export const checkoutPayd = asyncHandler(async (req: Request, res: Response) => 
   // 1. Create order as PENDING
   const settings = await prisma.businessSettings.findUnique({ where: { businessId } });
   const taxRate = Number(settings?.taxRate ?? 16);
-  const cartItems = input.lines.map(l => ({ unitPrice: l.unitPriceAtSale, quantity: l.quantity, discount: l.discount }));
+  const cartItems = input.lines.map(l => ({ productName: '', unitPrice: l.unitPriceAtSale, quantity: l.quantity, discount: l.discount }));
   const { subtotal, discountTotal, taxAmount, total } = calculateCartTotals(cartItems, taxRate, settings?.taxInclusive ?? false);
 
   const receiptNo = `RCP-${nanoid(8).toUpperCase()}`;

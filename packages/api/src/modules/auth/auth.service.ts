@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { nanoid } from 'nanoid';
+import { Prisma } from '@prisma/client';
 import { prisma } from '../../lib/prisma.js';
 import { redis, redisKeys } from '../../lib/redis.js';
 import { config } from '../../config.js';
@@ -13,7 +14,7 @@ const BCRYPT_ROUNDS = 12;
 
 function generateAccessToken(payload: Omit<JwtPayload, 'iat' | 'exp'>): string {
   return jwt.sign(payload, config.JWT_ACCESS_SECRET, {
-    expiresIn: config.JWT_ACCESS_EXPIRES_IN as jwt.SignOptions['expiresIn'],
+    expiresIn: config.JWT_ACCESS_EXPIRES_IN as any,
   });
 }
 
@@ -44,7 +45,7 @@ export async function registerBusiness(input: RegisterBusinessInput) {
   const baseSlug = businessName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').slice(0, 50);
   const slug = `${baseSlug}-${nanoid(6)}`;
 
-  const business = await prisma.$transaction(async (tx) => {
+  const business = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     const biz = await tx.business.create({
       data: {
         name: businessName,

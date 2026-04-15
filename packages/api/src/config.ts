@@ -24,6 +24,7 @@ const envSchema = z.object({
   EMAIL_FROM: z.string().email().default('noreply@dukapos.com'),
 
   FRONTEND_URL: z.string().url().default('http://localhost:5173'),
+  API_URL: z.string().url().default('http://localhost:4000'),
   APP_NAME: z.string().default('DukaPOS'),
 });
 

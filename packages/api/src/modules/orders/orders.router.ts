@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { authenticate, requireRole, businessScope } from '../../middleware/auth.js';
 import * as ctrl from './orders.controller.js';
 
-export const ordersRouter = Router();
+export const ordersRouter: Router = Router();
 ordersRouter.use(authenticate, businessScope);
 
 ordersRouter.get('/',         requireRole('OWNER', 'MANAGER', 'CASHIER'), ctrl.listOrders);
