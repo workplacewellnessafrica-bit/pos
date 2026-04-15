@@ -1,0 +1,31 @@
+previewsEnabled: true
+services:
+  # The Backend API Service (Node.js)
+  - type: web
+    name: dukapos-api
+    env: node
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm run build
+    # Prisma migrate deploy ensures schema is up to date before the server starts
+    startCommand: pnpm --filter @dukapos/db run migrate && pnpm --filter @dukapos/api start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: dukapos-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+
+databases:
+  # Managed PostgreSQL Database
+  - name: dukapos-db
+    databaseName: dukapos
+    user: dukapos_admin
+    plan: free # Change to 'starter' in Render Dashboard for production durability
