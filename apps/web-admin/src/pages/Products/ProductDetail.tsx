@@ -65,20 +65,29 @@ export function ProductDetail() {
   // Variant Builders
   const addGroup = () => setGroups([...groups, { name: '', optionValues: [], displayOrder: groups.length }]);
   const updateGroup = (idx: number, name: string) => {
-    const clone = [...groups]; clone[idx].name = name; setGroups(clone);
+    const clone = [...groups]; 
+    if (clone[idx]) {
+      clone[idx].name = name; 
+      setGroups(clone);
+    }
   };
   const removeGroup = (idx: number) => setGroups(groups.filter((_, i) => i !== idx));
 
   const addOption = (gIdx: number, val: string) => {
     if (!val) return;
     const clone = [...groups];
-    if (!clone[gIdx].optionValues.find(o => o.value === val)) {
-      clone[gIdx].optionValues.push({ value: val, displayOrder: clone[gIdx].optionValues.length });
+    const group = clone[gIdx];
+    if (group && !group.optionValues.find(o => o.value === val)) {
+      group.optionValues.push({ value: val, displayOrder: group.optionValues.length });
     }
     setGroups(clone);
   };
   const removeOption = (gIdx: number, oIdx: number) => {
-    const clone = [...groups]; clone[gIdx].optionValues.splice(oIdx, 1); setGroups(clone);
+    const clone = [...groups]; 
+    if (clone[gIdx]) {
+      clone[gIdx].optionValues.splice(oIdx, 1); 
+      setGroups(clone);
+    }
   };
 
   const updateVariant = (idx: number, field: string, val: any) => {
