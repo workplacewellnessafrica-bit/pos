@@ -1,4 +1,3 @@
-previewsEnabled: true
 services:
   # The Backend API Service (Node.js)
   - type: web
