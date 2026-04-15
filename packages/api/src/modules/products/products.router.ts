@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { authenticate, requireRole, businessScope } from '../../middleware/auth.js';
 import { upload } from '../../lib/upload.js';
+import multer from 'multer';
+const memUpload = multer({ storage: multer.memoryStorage() });
 import { CAN_MANAGE_PRODUCTS } from '@dukapos/shared';
 import * as ctrl from './products.controller.js';
 
@@ -11,6 +13,7 @@ productsRouter.use(authenticate, businessScope);
 productsRouter.get('/',           ctrl.listProducts);
 productsRouter.post('/',          requireRole('OWNER','MANAGER'), ctrl.createProduct);
 productsRouter.get('/:id',        ctrl.getProduct);
+productsRouter.post('/import',    requireRole('OWNER','MANAGER'), memUpload.single('file'), ctrl.importCsv);
 productsRouter.patch('/:id',      requireRole('OWNER','MANAGER'), ctrl.updateProduct);
 productsRouter.delete('/:id',     requireRole('OWNER','MANAGER'), ctrl.deleteProduct);
 

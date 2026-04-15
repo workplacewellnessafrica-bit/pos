@@ -4,9 +4,10 @@ import { prisma } from '../../lib/prisma.js';
 import {
   createProductSchema, updateProductSchema,
   upsertVariantGroupsSchema, updateVariantSchema, bulkUpdateVariantsSchema,
-  createCategorySchema,
+  createCategorySchema
 } from '@dukapos/shared';
 import { generateVariantCombinations } from '@dukapos/shared';
+import { parse } from 'csv-parse/sync';
 
 export const listProducts = asyncHandler(async (req: Request, res: Response) => {
   const businessId = req.user!.bid;
@@ -206,4 +207,47 @@ export const createCategory = asyncHandler(async (req: Request, res: Response) =
   const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '-');
   const cat = await prisma.category.create({ data: { businessId, name, slug } });
   res.status(201).json({ success: true, data: cat });
+});
+
+export const importCsv = asyncHandler(async (req: Request, res: Response) => {
+  const businessId = req.user!.bid;
+  if (!req.file) throw new AppError(400, 'No CSV file uploaded');
+
+  const fileContent = req.file.buffer.toString('utf-8');
+  const records = parse(fileContent, { columns: true, skip_empty_lines: true });
+  if (!records.length) throw new AppError(400, 'CSV is empty');
+
+  // Basic flat product import for v1. Variants map to simple products or can be grouped by Name.
+  // We'll create simple products for now as a baseline capability.
+  let added = 0;
+  await prisma.$transaction(async (tx) => {
+    for (const row of records) {
+      if (!row.Name || !row.BasePrice) continue;
+      
+      const product = await tx.product.create({
+        data: {
+          businessId,
+          name: row.Name,
+          basePrice: row.BasePrice,
+          barcode: row.Barcode || null,
+          hasVariants: false,
+          description: row.Description || null,
+        }
+      });
+      
+      await tx.variant.create({
+        data: {
+          productId: product.id,
+          sku: row.SKU || null,
+          price: row.BasePrice,
+          stockQuantity: Number(row.StockQuantity) || 0,
+          alertThreshold: Number(row.AlertThreshold) || 5,
+          barcode: row.Barcode || null,
+        }
+      });
+      added++;
+    }
+  });
+
+  res.json({ success: true, message: `Imported ${added} products` });
 });

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Search, Package, Pencil, ToggleLeft, ToggleRight, Loader2 } from 'lucide-react';
+import { useRef } from 'react';
+import { Plus, Search, Package, Pencil, ToggleLeft, ToggleRight, Loader2, UploadCloud } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import api from '@/api/client';
 import toast from 'react-hot-toast';
@@ -35,6 +36,21 @@ export function ProductsList() {
     onError: () => toast.error('Failed to update product'),
   });
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { mutate: importCsv, isPending: isImporting } = useMutation({
+    mutationFn: (file: File) => {
+      const fd = new FormData(); fd.append('file', file);
+      return api.post('/products/import', fd);
+    },
+    onSuccess: (res) => { toast.success(res.data.message || 'Import successful'); void qc.invalidateQueries({ queryKey: ['products'] }); },
+    onError: (err: any) => toast.error(err.response?.data?.message || 'Failed to import'),
+  });
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) importCsv(e.target.files[0]);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
   return (
     <div className="page">
       <div className="page-header flex items-center justify-between">
@@ -43,9 +59,15 @@ export function ProductsList() {
           <p className="text-muted text-sm">Manage your product catalogue and variants</p>
         </div>
         {canEdit && (
-          <button className="btn btn-primary" onClick={() => setShowModal(true)}>
-            <Plus size={16} /> New Product
-          </button>
+          <div className="flex gap-2">
+            <input type="file" accept=".csv" ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileUpload} />
+            <button className="btn btn-outline" onClick={() => fileInputRef.current?.click()} disabled={isImporting}>
+              {isImporting ? <Loader2 size={16} className="spin" /> : <UploadCloud size={16} />} Import CSV
+            </button>
+            <button className="btn btn-primary" onClick={() => setShowModal(true)}>
+              <Plus size={16} /> New Product
+            </button>
+          </div>
         )}
       </div>
 
