@@ -3,6 +3,7 @@ services:
   # The Backend API Service (Node.js)
   - type: web
     name: dukapos-api
+    plan: free
     env: node
     buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm run build
     # Prisma migrate deploy ensures schema is up to date before the server starts
