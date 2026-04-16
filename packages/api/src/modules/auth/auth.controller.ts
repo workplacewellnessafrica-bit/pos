@@ -1,7 +1,7 @@
-import type { Request, Response } from 'express';
-import { registerBusinessSchema, loginSchema } from '@dukapos/shared';
+import { registerBusinessSchema, loginSchema } from '@shoplink/shared';
 import { asyncHandler } from '../../middleware/error.js';
 import * as authService from './auth.service.js';
+import { googleAuthService } from '../../lib/google.js';
 
 const REFRESH_COOKIE = 'duka_refresh';
 const COOKIE_OPTS = {
@@ -54,4 +54,26 @@ export const logout = asyncHandler(async (req: Request, res: Response) => {
 
 export const me = asyncHandler(async (req: Request, res: Response) => {
   res.json({ success: true, data: req.user });
+});
+
+// ── Google OAuth ──
+
+export const googleLogin = asyncHandler(async (_req: Request, res: Response) => {
+  const url = googleAuthService.getAuthUrl();
+  res.json({ success: true, data: { url } });
+});
+
+export const googleCallback = asyncHandler(async (req: Request, res: Response) => {
+  const { code } = req.query;
+  if (!code) throw new Error('Authorization code missing');
+
+  const profile = await googleAuthService.getProfile(code as string);
+  const { refreshToken, ...rest } = await authService.handleGoogleProfile(profile);
+
+  res.cookie(REFRESH_COOKIE, refreshToken, COOKIE_OPTS);
+  
+  // Usually, in a redirect flow, we'd redirect back to the frontend with a token
+  // but for an SPA, it's often better to just send the JSON if called via an iframe/popup
+  // Or redirect to a "success" page on the frontend.
+  res.json({ success: true, data: rest });
 });

@@ -1,5 +1,5 @@
-{
-  "name": "@dukapos/pos-mobile",
+﻿{
+  "name": "@shoplink/pos-mobile",
   "version": "1.0.0",
   "main": "expo-router/entry",
   "private": true,
@@ -10,7 +10,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
-    "@dukapos/shared": "workspace:*",
+    "@shoplink/shared": "workspace:*",
     "expo": "~50.0.14",
     "expo-constants": "~15.4.5",
     "expo-linking": "~6.2.2",

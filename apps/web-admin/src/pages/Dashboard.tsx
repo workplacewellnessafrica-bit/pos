@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import {
   TrendingUp, ShoppingCart, Package, AlertTriangle,
-  ArrowUpRight, Users, Plus
+  ArrowUpRight, Plus, Activity
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import {
@@ -11,7 +11,12 @@ import {
 import api from '@/api/client';
 import { useAuthStore } from '@/stores/auth';
 import { format, subDays } from 'date-fns';
-import './Dashboard.css';
+import { 
+  Card, CardContent, CardDescription, CardHeader, CardTitle,
+  Button,
+  Badge
+} from '@shoplink/ui';
+import { formatCurrency } from '@shoplink/shared';
 
 interface RevenueData {
   totalRevenue: number;
@@ -22,8 +27,6 @@ interface RevenueData {
 }
 
 interface Alert { id: string; stockQuantity: number; alertThreshold: number; product: { name: string }; }
-
-const fmt = (n: number) => `KES ${n.toLocaleString('en-KE', { minimumFractionDigits: 0 })}`;
 
 export function DashboardPage() {
   const user = useAuthStore(s => s.user);
@@ -46,7 +49,6 @@ export function DashboardPage() {
     queryFn: () => api.get('/orders', { params: { limit: 8, status: 'COMPLETED' } }).then(r => r.data.data),
   });
 
-  // Build chart data from byDay
   const chartData = revenue?.byDay
     ? Object.entries(revenue.byDay)
         .sort(([a], [b]) => a.localeCompare(b))
@@ -60,9 +62,10 @@ export function DashboardPage() {
   const stats = [
     {
       label: 'Revenue (30d)',
-      value: revenue ? fmt(revenue.totalRevenue) : '—',
+      value: revenue ? formatCurrency(revenue.totalRevenue, user?.currency) : '—',
       icon: TrendingUp,
-      color: 'var(--blue)',
+      color: 'text-blue-400',
+      bg: 'bg-blue-400/10',
       change: '+12%',
       up: true,
     },
@@ -70,187 +73,206 @@ export function DashboardPage() {
       label: 'Total Orders',
       value: revenue?.orderCount.toLocaleString() ?? '—',
       icon: ShoppingCart,
-      color: 'var(--green)',
+      color: 'text-emerald-400',
+      bg: 'bg-emerald-400/10',
       change: '+8%',
       up: true,
     },
     {
-      label: 'Avg. Order Value',
-      value: revenue ? fmt(revenue.avgOrderValue) : '—',
-      icon: Package,
-      color: 'var(--violet)',
+      label: 'Avg. Order',
+      value: revenue ? formatCurrency(revenue.avgOrderValue, user?.currency) : '—',
+      icon: Activity,
+      color: 'text-indigo-400',
+      bg: 'bg-indigo-400/10',
       change: '+3%',
       up: true,
     },
     {
-      label: 'Low Stock Alerts',
+      label: 'Stock Alerts',
       value: alerts?.length.toString() ?? '0',
       icon: AlertTriangle,
-      color: alerts?.length ? 'var(--amber)' : 'var(--green)',
+      color: alerts?.length ? 'text-rose-400' : 'text-slate-400',
+      bg: alerts?.length ? 'bg-rose-400/10' : 'bg-slate-800/50',
       change: alerts?.length ? 'Needs attention' : 'All good',
       up: !alerts?.length,
     },
   ];
 
   return (
-    <div className="page">
+    <div className="space-y-8 p-6 lg:p-10 bg-[#050c18] min-h-screen">
       {/* Header */}
-      <div className="page-header flex items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1>Dashboard</h1>
-          <p className="text-muted text-sm">
-            Good {getGreeting()}, {user?.name?.split(' ')[0]} 👋
+          <h1 className="text-4xl font-black text-white tracking-tight">System Overview</h1>
+          <p className="text-slate-400 mt-2 font-medium">
+            Welcome back, <span className="text-blue-400">{user?.name}</span>. Performance is up this month.
           </p>
         </div>
-        <div className="flex gap-2">
-          <Link to="/orders" className="btn btn-outline btn-sm"><ShoppingCart size={14} /> Orders</Link>
-          <Link to="/products" className="btn btn-primary btn-sm"><Plus size={14} /> New Product</Link>
+        <div className="flex gap-3">
+          <Button variant="outline" asChild className="border-slate-800 bg-slate-900/50 text-slate-300">
+            <Link to="/reports">Insights</Link>
+          </Button>
+          <Button asChild className="bg-blue-600 hover:bg-blue-500 font-bold shadow-lg shadow-blue-500/20">
+            <Link to="/products/new"><Plus className="w-4 h-4 mr-2" /> New Product</Link>
+          </Button>
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="dashboard-stats">
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((s) => (
-          <div key={s.label} className="stat-card" style={{ '--accent-color': s.color } as React.CSSProperties}>
-            <div className="flex items-center justify-between">
-              <span className="stat-label">{s.label}</span>
-              <div className="stat-icon" style={{ color: s.color }}>
-                <s.icon size={18} />
+          <Card key={s.label} className="bg-slate-900/40 border-slate-800/80 hover:border-slate-700 transition-all rounded-3xl overflow-hidden backdrop-blur-sm">
+            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+              <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">{s.label}</CardTitle>
+              <div className={`${s.bg} p-2 rounded-xl`}>
+                <s.icon className={`w-4 h-4 ${s.color}`} />
               </div>
-            </div>
-            <div className="stat-value" style={{ color: s.color }}>
-              {revLoading ? <div className="spinner" /> : s.value}
-            </div>
-            <div className={`stat-change ${s.up ? 'up' : 'down'}`}>
-              <ArrowUpRight size={12} style={{ transform: s.up ? 'none' : 'rotate(90deg)' }} />
-              {s.change} vs last month
-            </div>
-          </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-black text-white">
+                {revLoading ? <div className="h-8 w-24 bg-slate-800 animate-pulse rounded" /> : s.value}
+              </div>
+              <div className="flex items-center gap-2 mt-4">
+                <Badge variant="outline" className={`text-[10px] font-bold ${s.up ? 'border-emerald-500/30 text-emerald-400' : 'border-rose-500/30 text-rose-400'}`}>
+                  {s.change}
+                </Badge>
+                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-tighter">vs last month</span>
+              </div>
+            </CardContent>
+          </Card>
         ))}
       </div>
 
-      <div className="dashboard-grid">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Revenue chart */}
-        <div className="card dashboard-chart-card">
-          <div className="flex items-center justify-between" style={{ marginBottom: 20 }}>
-            <h3>Revenue — Last 30 Days</h3>
-            <span className="badge badge-blue">KES</span>
-          </div>
-          <ResponsiveContainer width="100%" height={220}>
-            <AreaChart data={chartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-              <defs>
-                <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%"   stopColor="#3b82f6" stopOpacity={0.25} />
-                  <stop offset="95%"  stopColor="#3b82f6" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,.04)" />
-              <XAxis dataKey="date" tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={n => `${(n/1000).toFixed(0)}k`} />
-              <Tooltip
-                contentStyle={{ background: '#0f1f3d', border: '1px solid #1a2d4a', borderRadius: 10, fontSize: 12 }}
-                labelStyle={{ color: '#e2e8f0', fontWeight: 600 }}
-                formatter={(v: number) => [fmt(v), 'Revenue']}
-              />
-              <Area type="monotone" dataKey="revenue" stroke="#3b82f6" strokeWidth={2} fill="url(#colorRev)" />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
+        <Card className="lg:col-span-2 bg-slate-900/40 border-slate-800/80 rounded-3xl overflow-hidden">
+          <CardHeader className="pb-8">
+            <div className="flex justify-between items-start">
+               <div>
+                  <CardTitle className="text-xl font-bold text-white">Revenue Analysis</CardTitle>
+                  <CardDescription className="text-slate-500">Sales volume performance across the last 30 days</CardDescription>
+               </div>
+               <Badge className="bg-blue-600/20 text-blue-400 border-blue-500/30 font-bold">{user?.currency || 'KES'}</Badge>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData}>
+                  <defs>
+                    <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.03)" />
+                  <XAxis 
+                    dataKey="date" 
+                    tick={{ fill: '#475569', fontSize: 10, fontWeight: 700 }} 
+                    axisLine={false} 
+                    tickLine={false} 
+                    dy={10}
+                  />
+                  <YAxis 
+                    tick={{ fill: '#475569', fontSize: 10, fontWeight: 700 }} 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tickFormatter={n => n >= 1000 ? `${(n/1000).toFixed(0)}k` : n}
+                    dx={-10}
+                  />
+                  <Tooltip
+                    contentStyle={{ background: '#0a1628', border: '1px solid #1e293b', borderRadius: '16px', fontSize: '12px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}
+                    itemStyle={{ color: '#fff', fontWeight: 700 }}
+                  />
+                  <Area type="monotone" dataKey="revenue" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorRev)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Low stock alerts */}
-        <div className="card">
-          <div className="flex items-center justify-between" style={{ marginBottom: 16 }}>
-            <h3>Low Stock Alerts</h3>
-            <Link to="/inventory" className="btn btn-ghost btn-sm">View all</Link>
-          </div>
-          {!alerts?.length ? (
-            <div className="empty-state" style={{ padding: '32px 0' }}>
-              <Package size={32} style={{ margin: '0 auto 8px', opacity: .3 }} />
-              <p>All stock levels are healthy</p>
+        <Card className="bg-emerald-500/5 border-slate-800/80 rounded-3xl overflow-hidden">
+          <CardHeader className="flex flex-row items-center justify-between pb-4">
+            <div>
+               <CardTitle className="text-lg font-bold text-white">Inventory Alerts</CardTitle>
+               <CardDescription className="text-slate-500">Critical stock notifications</CardDescription>
             </div>
-          ) : (
-            <div className="flex-col gap-2">
-              {alerts.slice(0, 6).map((a) => (
-                <div key={a.id} className="alert-row">
-                  <div className="alert-dot" />
-                  <div className="flex-col gap-2" style={{ flex: 1 }}>
-                    <span className="text-sm" style={{ fontWeight: 500 }}>{a.product.name}</span>
-                    <span className="text-xs text-muted">{a.stockQuantity} left · threshold {a.alertThreshold}</span>
+            <Link to="/inventory">
+              <Button variant="ghost" size="icon" className="text-slate-400 hover:text-white"><ArrowUpRight className="w-5 h-5"/></Button>
+            </Link>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {!alerts?.length ? (
+              <div className="flex flex-col items-center justify-center py-20 text-slate-600 opacity-30">
+                <Package size={48} className="mb-4" />
+                <p className="font-bold uppercase tracking-widest text-xs">All labels healthy</p>
+              </div>
+            ) : (
+              alerts.slice(0, 6).map((a) => (
+                <div key={a.id} className="flex items-center gap-4 p-3 rounded-2xl bg-slate-900/40 border border-slate-800/50">
+                  <div className="w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-slate-200 truncate">{a.product.name}</p>
+                    <p className="text-[10px] text-slate-500 font-bold uppercase">{a.stockQuantity} remaining</p>
                   </div>
-                  <span className="badge badge-amber">{a.stockQuantity}</span>
+                  <Badge variant="destructive" className="bg-rose-500/10 text-rose-400 border-none px-2 py-0 text-[10px]">{a.stockQuantity}</Badge>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
 
         {/* Recent orders */}
-        <div className="card dashboard-orders-card">
-          <div className="flex items-center justify-between" style={{ marginBottom: 16 }}>
-            <h3>Recent Orders</h3>
-            <Link to="/orders" className="btn btn-ghost btn-sm">View all</Link>
-          </div>
-          <div className="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Receipt</th><th>Cashier</th><th>Total</th><th>Method</th><th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(ordersData as { id:string; receiptNo:string; cashier:{name:string}; total:string; paymentMethod:string; status:string }[] ?? []).map(o => (
-                  <tr key={o.id}>
-                    <td className="font-mono" style={{ fontSize: 12 }}>{o.receiptNo}</td>
-                    <td>{o.cashier.name}</td>
-                    <td style={{ fontWeight: 600 }}>{fmt(Number(o.total))}</td>
-                    <td><span className="badge badge-muted">{o.paymentMethod}</span></td>
-                    <td><span className={`badge ${statusBadge(o.status)}`}>{o.status}</span></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Payment breakdown */}
-        <div className="card">
-          <h3 style={{ marginBottom: 16 }}>Payment Methods</h3>
-          {revenue?.paymentBreakdown && Object.entries(revenue.paymentBreakdown).map(([method, amount]) => {
-            const pct = Math.round((amount / revenue.totalRevenue) * 100);
-            return (
-              <div key={method} className="pay-method-row">
-                <div className="flex items-center justify-between" style={{ marginBottom: 4 }}>
-                  <span className="text-sm" style={{ fontWeight: 500 }}>{method}</span>
-                  <span className="text-sm text-muted">{pct}%</span>
-                </div>
-                <div className="pay-bar-bg">
-                  <div className="pay-bar-fill" style={{ width: `${pct}%`, background: methodColor(method) }} />
-                </div>
-                <span className="text-xs text-muted">{fmt(amount)}</span>
+        <Card className="lg:col-span-3 bg-slate-900/40 border-slate-800/80 rounded-3xl overflow-hidden">
+           <CardHeader className="pb-0">
+              <div className="flex justify-between items-center">
+                 <div>
+                    <CardTitle className="text-xl font-bold text-white">Fulfillment Stream</CardTitle>
+                    <CardDescription className="text-slate-500">Real-time order activity across all terminals</CardDescription>
+                 </div>
+                 <Link to="/orders">
+                   <Button variant="outline" className="border-slate-800 hover:bg-slate-800 text-slate-400">View Full Ledger</Button>
+                 </Link>
               </div>
-            );
-          })}
-        </div>
+           </CardHeader>
+           <CardContent className="pt-6">
+              <div className="overflow-x-auto">
+                 <table className="w-full text-left border-separate border-spacing-y-2">
+                    <thead>
+                       <tr className="text-[10px] font-black uppercase tracking-widest text-slate-600">
+                          <th className="px-4 pb-2">Reference</th>
+                          <th className="px-4 pb-2">Terminal / Cashier</th>
+                          <th className="px-4 pb-2">Revenue</th>
+                          <th className="px-4 pb-2">Method</th>
+                          <th className="px-4 pb-2">Timestamp</th>
+                       </tr>
+                    </thead>
+                    <tbody className="space-y-4">
+                       {(ordersData as any[] ?? []).map(o => (
+                         <tr key={o.id} className="bg-slate-900/40 border border-slate-800 group hover:bg-slate-800/40 transition-colors">
+                            <td className="px-4 py-4 rounded-l-2xl font-mono text-xs text-blue-400">{o.receiptNo || 'POS-AUTO'}</td>
+                            <td className="px-4 py-4">
+                               <div className="flex items-center gap-3">
+                                  <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-[10px] font-bold text-slate-400">{o.cashier.name[0]}</div>
+                                  <span className="text-sm font-bold text-slate-200">{o.cashier.name}</span>
+                               </div>
+                            </td>
+                            <td className="px-4 py-4 font-black text-white">{formatCurrency(Number(o.total), user?.currency)}</td>
+                            <td className="px-4 py-4">
+                               <Badge variant="outline" className="border-slate-800 text-[10px] font-bold text-slate-400">{o.paymentMethod}</Badge>
+                            </td>
+                            <td className="px-4 py-4 rounded-r-2xl text-xs text-slate-500 font-medium">
+                               {format(new Date(o.createdAt), 'hh:mm a')}
+                            </td>
+                         </tr>
+                       ))}
+                    </tbody>
+                 </table>
+              </div>
+           </CardContent>
+        </Card>
       </div>
     </div>
   );
-}
-
-function getGreeting() {
-  const h = new Date().getHours();
-  if (h < 12) return 'morning';
-  if (h < 17) return 'afternoon';
-  return 'evening';
-}
-function statusBadge(s: string) {
-  if (s === 'COMPLETED') return 'badge-green';
-  if (s === 'VOIDED')    return 'badge-rose';
-  if (s === 'REFUNDED')  return 'badge-amber';
-  return 'badge-muted';
-}
-function methodColor(m: string) {
-  if (m === 'CASH')  return 'var(--green)';
-  if (m === 'MPESA') return 'var(--blue)';
-  if (m === 'CARD')  return 'var(--violet)';
-  return 'var(--cyan)';
 }

@@ -2,7 +2,7 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Package, Warehouse, ShoppingCart,
   BarChart3, Users, Settings, LogOut, Bell, ChevronDown,
-  Zap, AlertTriangle,
+  Zap, AlertTriangle, ClipboardList, Monitor,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth';
 import { useQuery } from '@tanstack/react-query';
@@ -12,13 +12,14 @@ import toast from 'react-hot-toast';
 import './Layout.css';
 
 const NAV = [
-  { to: '/',          icon: LayoutDashboard, label: 'Dashboard'  },
-  { to: '/products',  icon: Package,          label: 'Products'   },
-  { to: '/inventory', icon: Warehouse,         label: 'Inventory'  },
-  { to: '/orders',    icon: ShoppingCart,      label: 'Orders'     },
-  { to: '/reports',   icon: BarChart3,         label: 'Reports'    },
-  { to: '/team',      icon: Users,             label: 'Team'       },
-  { to: '/settings',  icon: Settings,          label: 'Settings'   },
+  { to: '/',           icon: LayoutDashboard, label: 'Dashboard'    },
+  { to: '/products',   icon: Package,          label: 'Products'     },
+  { to: '/inventory',  icon: Warehouse,         label: 'Inventory'   },
+  { to: '/orders',     icon: ShoppingCart,      label: 'Orders'      },
+  { to: '/reports',    icon: BarChart3,         label: 'Analytics'   },
+  { to: '/reconcile',  icon: ClipboardList,     label: 'Reconcile'   },
+  { to: '/team',       icon: Users,             label: 'Team'        },
+  { to: '/settings',   icon: Settings,          label: 'Settings'    },
 ];
 
 export function Layout() {
@@ -60,7 +61,7 @@ export function Layout() {
       <aside className="sidebar">
         <div className="sidebar-logo">
           <div className="logo-icon"><Zap size={18} /></div>
-          <span className="logo-text">DukaPOS</span>
+          <span className="logo-text">ShopLink</span>
         </div>
 
         <nav className="sidebar-nav">

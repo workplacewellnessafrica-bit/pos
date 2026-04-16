@@ -1,14 +1,15 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { BarChart3, Download, Loader2, TrendingUp, Users, Package } from 'lucide-react';
+import { BarChart3, Download, Loader2, TrendingUp, Users, Package, PieChart as PieIcon } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import api from '@/api/client';
 import { subDays, format } from 'date-fns';
+import { DaySalesAnalytics } from '@/components/DaySalesAnalytics';
 
 const fmt = (n: number) => `KES ${n.toLocaleString('en-KE', { minimumFractionDigits: 0 })}`;
 
 export function ReportsPage() {
-  const [tab, setTab] = useState<'revenue' | 'products' | 'staff'>('revenue');
+  const [tab, setTab] = useState<'overview' | 'revenue' | 'products' | 'staff'>('overview');
   const [range, setRange] = useState('30');
 
   const dateFrom = subDays(new Date(), Number(range)).toISOString();
@@ -38,7 +39,7 @@ export function ReportsPage() {
     });
     const url = URL.createObjectURL(new Blob([res.data as BlobPart]));
     const a = document.createElement('a'); a.href = url;
-    a.download = `dukapos-${tab}-${format(new Date(),'yyyy-MM-dd')}.xlsx`;
+    a.download = `shoplink-${tab}-${format(new Date(),'yyyy-MM-dd')}.xlsx`;
     a.click(); URL.revokeObjectURL(url);
   };
 
@@ -52,8 +53,8 @@ export function ReportsPage() {
     <div className="page">
       <div className="page-header flex items-center justify-between">
         <div>
-          <h1>Reports</h1>
-          <p className="text-muted text-sm">Financial summaries and exportable tables</p>
+          <h1>Analytics</h1>
+          <p className="text-muted text-sm">Financial summaries and exportable reports</p>
         </div>
         <div className="flex gap-2">
           <select className="input select" style={{ width: 140 }} value={range} onChange={e => setRange(e.target.value)}>
@@ -89,18 +90,21 @@ export function ReportsPage() {
 
       {/* Tabs */}
       <div className="flex gap-2" style={{ marginBottom: 20 }}>
-        {(['revenue','products','staff'] as const).map(t => (
+        {(['overview','revenue','products','staff'] as const).map(t => (
           <button
             key={t}
             className={`btn ${tab === t ? 'btn-primary' : 'btn-outline'} btn-sm`}
             onClick={() => setTab(t)}
             style={{ textTransform: 'capitalize' }}
           >
-            {t === 'revenue' ? <TrendingUp size={14} /> : t === 'products' ? <Package size={14} /> : <Users size={14} />}
+            {t === 'overview' ? <PieIcon size={14} /> : t === 'revenue' ? <TrendingUp size={14} /> : t === 'products' ? <Package size={14} /> : <Users size={14} />}
             {t}
           </button>
         ))}
       </div>
+
+      {/* Overview — Day Analytics (grafted from ShopLink) */}
+      {tab === 'overview' && <DaySalesAnalytics days={7} />}
 
       {/* Revenue chart */}
       {tab === 'revenue' && (

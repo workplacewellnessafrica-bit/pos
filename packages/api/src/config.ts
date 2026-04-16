@@ -21,11 +21,17 @@ const envSchema = z.object({
   AT_SENDER_ID: z.string().default('DUKAPOS'),
 
   RESEND_API_KEY: z.string().optional(),
-  EMAIL_FROM: z.string().email().default('noreply@dukapos.com'),
+  EMAIL_FROM: z.string().email().default('noreply@shoplink.co'),
 
   FRONTEND_URL: z.string().url().default('http://localhost:5173'),
   API_URL: z.string().url().default('http://localhost:4000'),
-  APP_NAME: z.string().default('DukaPOS'),
+  APP_NAME: z.string().default('ShopLink'),
+  
+  FORGE_API_URL: z.string().optional(),
+  FORGE_API_KEY: z.string().optional(),
+
+  GOOGLE_CLIENT_ID: z.string().optional(),
+  GOOGLE_CLIENT_SECRET: z.string().optional(),
 });
 
 const parsed = envSchema.safeParse(process.env);

@@ -2,12 +2,14 @@ import type { Request, Response } from 'express';
 import { asyncHandler, AppError } from '../../middleware/error.js';
 import { prisma } from '../../lib/prisma.js';
 import { Prisma } from '@prisma/client';
-import { createOrderSchema, listOrdersQuerySchema, updateOrderStatusSchema, syncOrdersSchema } from '@dukapos/shared';
-import { calculateCartTotals } from '@dukapos/shared';
+import { createOrderSchema, listOrdersQuerySchema, updateOrderStatusSchema, syncOrdersSchema } from '@shoplink/shared';
+import { calculateCartTotals } from '@shoplink/shared';
 import { emitSaleNew, emitStockAlert, emitSyncAck } from '../../realtime/socket.js';
 import { PaydService } from '../../lib/payd.js';
 import { generateReceiptHTML } from '../../modifiers/receipt.js';
 import { nanoid } from 'nanoid';
+import { sendWhatsAppOrderConfirmation } from '../../lib/whatsapp.js';
+import { formatCurrency } from '@shoplink/shared';
 
 export const listOrders = asyncHandler(async (req: Request, res: Response) => {
   const businessId = req.user!.bid;
@@ -143,6 +145,31 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     cashierName: cashier?.name ?? '',
     paymentMethod: input.paymentMethod,
   });
+
+  // ── WhatsApp Notification ───────────────────────────────────────────────────
+  try {
+    const business = await prisma.business.findUnique({
+      where: { id: businessId },
+      select: { name: true, phone: true, currency: true }
+    });
+
+    if (business?.phone) {
+      const orderSummary = [
+        `*New Sale - ${business.name}*`,
+        `Receipt: ${order.receiptNo}`,
+        `Total: ${formatCurrency(total, business.currency)}`,
+        `Method: ${input.paymentMethod}`,
+        `Items: ${input.lines.length}`,
+        `Cashier: ${cashier?.name ?? 'Admin'}`,
+        `Time: ${new Date().toLocaleTimeString()}`,
+      ].join('\n');
+      
+      // Async fire-and-forget
+      sendWhatsAppOrderConfirmation(business.phone, orderSummary);
+    }
+  } catch (err) {
+    console.warn('[WhatsApp] Failed to trigger notification:', err);
+  }
 
   res.status(201).json({ success: true, data: order });
 });

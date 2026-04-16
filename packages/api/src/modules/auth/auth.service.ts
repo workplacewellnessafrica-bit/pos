@@ -6,7 +6,7 @@ import { prisma } from '../../lib/prisma.js';
 import { redis, redisKeys } from '../../lib/redis.js';
 import { config } from '../../config.js';
 import { AppError } from '../../middleware/error.js';
-import type { RegisterBusinessInput, LoginInput, JwtPayload } from '@dukapos/shared';
+import type { RegisterBusinessInput, LoginInput, JwtPayload } from '@shoplink/shared';
 
 const BCRYPT_ROUNDS = 12;
 
@@ -170,4 +170,83 @@ export async function logout(userId: string, refreshToken: string): Promise<void
     data: { revokedAt: new Date() },
   });
   await redis.del(redisKeys.session(userId));
+}
+
+// ── Google OAuth ──────────────────────────────────────────────────────────────
+
+export async function handleGoogleProfile(profile: { id: string; email: string; name: string }) {
+  // 1. Try finding user by googleId or email
+  let user = await prisma.user.findFirst({
+    where: {
+      OR: [
+        { googleId: profile.id },
+        { email: profile.email },
+      ],
+    },
+    include: { business: { select: { id: true, name: true, isActive: true } } },
+  });
+
+  // 2. If no user, check for a pending invitation
+  if (!user) {
+    const invite = await prisma.invitation.findUnique({
+      where: { token: 'TOKEN_PLACEHOLDER' }, // In a real flow, we'd pass the token. 
+      // For Google SSO, we usually match by email if it's an enterprise invite.
+    });
+    
+    // Better logic: Find invitation by email
+    const invitation = await prisma.invitation.findFirst({
+      where: { email: profile.email },
+    });
+
+    if (!invitation) {
+      throw new AppError(403, 'No account found for this email. Please ask your administrator for an invite.');
+    }
+
+    // Create user from invitation
+    user = await prisma.user.create({
+      data: {
+        businessId: invitation.businessId,
+        email: profile.email,
+        googleId: profile.id,
+        name: profile.name,
+        role: invitation.role,
+        emailVerified: true,
+      },
+      include: { business: { select: { id: true, name: true, isActive: true } } },
+    });
+
+    // Delete invitation
+    await prisma.invitation.delete({ where: { id: invitation.id } });
+  } else if (!user.googleId) {
+    // Link Google ID if they previously used passwords
+    user = await prisma.user.update({
+      where: { id: user.id },
+      data: { googleId: profile.id },
+      include: { business: { select: { id: true, name: true, isActive: true } } },
+    });
+  }
+
+  if (!user.isActive || !user.business.isActive) {
+    throw new AppError(403, 'Your account or business is inactive');
+  }
+
+  // 3. Issue tokens (Same as login)
+  const accessToken = generateAccessToken({ sub: user.id, bid: user.businessId, role: user.role });
+  const refreshToken = generateRefreshToken();
+  await storeRefreshToken(user.id, refreshToken);
+  await prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } });
+
+  return {
+    accessToken,
+    refreshToken,
+    expiresIn: 900,
+    user: {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      businessId: user.businessId,
+      businessName: user.business.name,
+    },
+  };
 }

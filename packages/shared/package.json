@@ -1,5 +1,5 @@
 {
-  "name": "@dukapos/shared",
+  "name": "@shoplink/shared",
   "version": "1.0.0",
   "private": true,
   "main": "./dist/index.js",

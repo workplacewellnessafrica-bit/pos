@@ -1,8 +1,8 @@
-import type { Request, Response, NextFunction } from 'express';
+﻿import type { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { config } from '../config.js';
 import { AppError } from './error.js';
-import type { JwtPayload, Role } from '@dukapos/shared';
+import type { JwtPayload, Role } from '@shoplink/shared';
 
 // Augment Express Request with our auth context
 declare global {

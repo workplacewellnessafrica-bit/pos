@@ -1,9 +1,9 @@
-import { Server } from 'socket.io';
+﻿import { Server } from 'socket.io';
 import type { Server as HttpServer } from 'http';
 import jwt from 'jsonwebtoken';
 import { config } from '../config.js';
 import { logger } from '../lib/logger.js';
-import type { JwtPayload, StockAlertEvent, SaleNewEvent, SyncAckEvent } from '@dukapos/shared';
+import type { JwtPayload, StockAlertEvent, SaleNewEvent, SyncAckEvent } from '@shoplink/shared';
 
 let io: Server;
 

@@ -1,7 +1,7 @@
-import { useEffect, useRef } from 'react';
+﻿import { useEffect, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useAuthStore } from '@/stores/auth';
-import type { StockAlertEvent, SaleNewEvent } from '@dukapos/shared';
+import type { StockAlertEvent, SaleNewEvent } from '@shoplink/shared';
 
 const WS_URL = import.meta.env.VITE_WS_URL ?? '';
 

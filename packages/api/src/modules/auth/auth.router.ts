@@ -10,3 +10,7 @@ authRouter.post('/login',    authRateLimiter, authController.login);
 authRouter.post('/refresh',  authRateLimiter, authController.refresh);
 authRouter.post('/logout',   authenticate,    authController.logout);
 authRouter.get('/me',        authenticate,    authController.me);
+
+// Google OAuth
+authRouter.get('/google',           authController.googleLogin);
+authRouter.get('/google/callback',  authController.googleCallback);

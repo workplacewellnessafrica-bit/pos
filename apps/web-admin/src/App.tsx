@@ -10,6 +10,7 @@ import { OrdersPage }    from '@/pages/Orders';
 import { ReportsPage }   from '@/pages/Reports';
 import { TeamPage }      from '@/pages/Team';
 import { SettingsPage }  from '@/pages/Settings';
+import { DayEndReconciliationPage } from '@/pages/DayEndReconciliation';
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const token = useAuthStore(s => s.accessToken);
@@ -43,6 +44,7 @@ export default function App() {
           <Route path="reports"    element={<ReportsPage />} />
           <Route path="team"       element={<TeamPage />} />
           <Route path="settings"   element={<SettingsPage />} />
+          <Route path="reconcile"  element={<DayEndReconciliationPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

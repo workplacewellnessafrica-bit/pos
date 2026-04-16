@@ -1,6 +1,6 @@
-import axios from 'axios';
+﻿import axios from 'axios';
 import { config as env } from '../config.js';
-import { generateId } from '@dukapos/shared';
+import { generateId } from '@shoplink/shared';
 
 export class PaydService {
   private static baseURL = 'https://api.mypayd.app/v1'; // Base API URL approximation

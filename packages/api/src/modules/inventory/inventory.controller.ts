@@ -1,8 +1,8 @@
-import type { Request, Response } from 'express';
+﻿import type { Request, Response } from 'express';
 import { asyncHandler, AppError } from '../../middleware/error.js';
 import { prisma } from '../../lib/prisma.js';
 import { Prisma } from '@prisma/client';
-import { inventoryAdjustmentSchema, receiveStockSchema } from '@dukapos/shared';
+import { inventoryAdjustmentSchema, receiveStockSchema } from '@shoplink/shared';
 import { emitStockAlert, emitInventoryUpdated } from '../../realtime/socket.js';
 
 export const getStockLevels = asyncHandler(async (req: Request, res: Response) => {

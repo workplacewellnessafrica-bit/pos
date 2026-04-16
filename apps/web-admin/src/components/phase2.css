@@ -1,0 +1,119 @@
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   ShopLink Graft — Phase 2 CSS
+   New component styles: Day-End Reconciliation, BarcodeScanner, DaySalesAnalytics
+══════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Spin animation (used on Loader2 icons) ─────────────────────────────────── */
+.spin { animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Day-End Reconciliation ─────────────────────────────────────────────────── */
+.recon-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+@media (max-width: 900px) { .recon-grid { grid-template-columns: 1fr; } }
+
+.recon-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.recon-summary-item {
+  display: flex; flex-direction: column; gap: 4px;
+  background: var(--bg-surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 12px 14px;
+}
+
+.recon-calc-card {
+  background: var(--bg-surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 16px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.recon-calc-row {
+  display: flex; justify-content: space-between;
+  font-size: 13px; color: var(--text);
+}
+.recon-calc-divider {
+  height: 1px; background: var(--border);
+  margin: 4px 0;
+}
+
+/* ── BarcodeScanner ─────────────────────────────────────────────────────────── */
+.scanner-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(5,12,24,.85);
+  backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+}
+.scanner-modal {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  width: 100%; max-width: 440px;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+}
+.scanner-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.scanner-viewfinder {
+  position: relative; width: 100%; height: 260px;
+  background: #000; overflow: hidden;
+}
+.scanner-video { width: 100%; height: 100%; object-fit: cover; }
+.scanner-reticle {
+  position: absolute; inset: 20px;
+  border: 2px solid rgba(59,130,246,.7);
+  border-radius: 12px;
+}
+.scanner-line {
+  position: absolute; top: 50%; left: 0; right: 0; height: 2px;
+  background: var(--blue);
+  animation: scan-line 1.8s ease-in-out infinite;
+}
+@keyframes scan-line {
+  0%, 100% { top: 15%; opacity: 1; }
+  50%       { top: 85%; opacity: .6; }
+}
+.scanner-fallback {
+  padding: 40px 20px; display: flex; flex-direction: column; align-items: center;
+}
+.scanner-manual {
+  padding: 16px 20px;
+  display: flex; gap: 10px;
+  border-top: 1px solid var(--border);
+}
+.scanner-manual .input { flex: 1; }
+.scanner-manual .btn { white-space: nowrap; }
+
+/* ── DaySalesAnalytics ─────────────────────────────────────────────────────── */
+.analytics-section { margin-top: 8px; }
+.analytics-charts {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 900px) { .analytics-charts { grid-template-columns: 1fr; } }
+
+/* ── Socket toast ────────────────────────────────────────────────────────────── */
+.socket-toast {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--bg-surface2);
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-md);
+  padding: 10px 14px;
+  font-size: 13px;
+  opacity: 0;
+  transition: opacity .25s ease;
+  box-shadow: var(--shadow-md);
+}
+.socket-toast.visible { opacity: 1; }

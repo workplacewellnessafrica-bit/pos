@@ -1,5 +1,5 @@
 {
-  "name": "@dukapos/db",
+  "name": "@shoplink/db",
   "version": "1.0.0",
   "private": true,
   "scripts": {

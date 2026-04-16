@@ -1,9 +1,9 @@
-import { Router } from 'express';
+﻿import { Router } from 'express';
 import { authenticate, requireRole, businessScope } from '../../middleware/auth.js';
 import { upload } from '../../lib/upload.js';
 import multer from 'multer';
 const memUpload = multer({ storage: multer.memoryStorage() });
-import { CAN_MANAGE_PRODUCTS } from '@dukapos/shared';
+import { CAN_MANAGE_PRODUCTS } from '@shoplink/shared';
 import * as ctrl from './products.controller.js';
 
 export const productsRouter: Router = Router();

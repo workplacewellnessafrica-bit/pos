@@ -1,9 +1,9 @@
-import type { Request, Response } from 'express';
+﻿import type { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import { asyncHandler, AppError } from '../../middleware/error.js';
 import { prisma } from '../../lib/prisma.js';
 import { emitSessionKicked } from '../../realtime/socket.js';
-import type { Role } from '@dukapos/shared';
+import type { Role } from '@shoplink/shared';
 
 export const listStaff = asyncHandler(async (req: Request, res: Response) => {
   const businessId = req.user!.bid;

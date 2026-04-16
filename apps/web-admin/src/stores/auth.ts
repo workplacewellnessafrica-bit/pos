@@ -1,6 +1,6 @@
-import { create } from 'zustand';
+﻿import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Role } from '@dukapos/shared';
+import type { Role } from '@shoplink/shared';
 
 interface AuthUser {
   id: string;

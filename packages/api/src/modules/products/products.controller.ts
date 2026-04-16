@@ -1,4 +1,4 @@
-import type { Request, Response } from 'express';
+﻿import type { Request, Response } from 'express';
 import { asyncHandler, AppError } from '../../middleware/error.js';
 import { prisma } from '../../lib/prisma.js';
 import { Prisma } from '@prisma/client';
@@ -6,8 +6,8 @@ import {
   createProductSchema, updateProductSchema,
   upsertVariantGroupsSchema, updateVariantSchema, bulkUpdateVariantsSchema,
   createCategorySchema
-} from '@dukapos/shared';
-import { generateVariantCombinations } from '@dukapos/shared';
+} from '@shoplink/shared';
+import { generateVariantCombinations } from '@shoplink/shared';
 import { parse } from 'csv-parse/sync';
 
 export const listProducts = asyncHandler(async (req: Request, res: Response) => {
