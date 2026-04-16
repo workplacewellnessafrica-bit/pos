@@ -14,6 +14,11 @@
     "skipLibCheck": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "paths": {
+      "@shoplink/shared": ["./packages/shared/src/index.ts"],
+      "@shoplink/db": ["./packages/db/prisma/client/index.d.ts"]
+    }
   }
 }

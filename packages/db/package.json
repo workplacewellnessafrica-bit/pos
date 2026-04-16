@@ -2,6 +2,14 @@
   "name": "@shoplink/db",
   "version": "1.0.0",
   "private": true,
+  "main": "./prisma/client/index.js",
+  "types": "./prisma/client/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./prisma/client/index.js",
+      "types": "./prisma/client/index.d.ts"
+    }
+  },
   "scripts": {
     "generate": "prisma generate",
     "migrate:dev": "prisma migrate dev",
