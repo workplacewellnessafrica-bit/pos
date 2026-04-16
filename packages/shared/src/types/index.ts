@@ -17,6 +17,7 @@ export interface AuthUser {
   name: string;
   role: Role;
   isActive: boolean;
+  currency?: string;
 }
 
 export interface AuthTokens {
